@@ -2,6 +2,15 @@
   #restaurants-list li {
     max-width: 33%;
   }
+  
+  .filter-options {
+     display: flex;
+   }
+   
+   .filter-options select {
+     display: block;
+   }
+   
 }
 
 @media screen and (min-width: 800px) {
