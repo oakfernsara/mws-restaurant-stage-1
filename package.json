@@ -19,5 +19,9 @@
   "homepage": "https://github.com/oakfernsara/mws-restaurant-stage-1#readme",
   "dependencies": {
     "sails": "^1.0.2"
+  },
+  "devDependencies": {
+    "grunt": "^1.0.3",
+    "grunt-responsive-images": "^1.10.1"
   }
 }
