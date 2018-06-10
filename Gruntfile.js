@@ -1,18 +1,22 @@
 module.exports = function(grunt) {
   
-  require("matchdep").filterDev("grunt-*").forEach(grunt.loadNpmTasks);
-  
   grunt.initConfig({
     responsive_images: {
+      myTask:{
       options: {
         //Task-specific options go here.
       },
       files: [{
         expand: true,
-        src:['img/**.{jpg,gif,png}'],
-        cwd: 'test/',
-        dest: 'tmp/'
+        src:['**.{jpg,gif,png}'],
+        cwd: 'img/',
+        dest: 'img/resize'
       }]
     }
-  })
+    }
+  });
+  
+  grunt.loadNpmTasks('grunt-responsive-images');
+  
+  grunt.registerTask('default', ['responsive_images'])
 }
