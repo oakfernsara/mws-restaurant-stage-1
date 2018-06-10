@@ -5,6 +5,18 @@ var map
 var markers = []
 
 /**
+ * Register Service Worker
+ */
+ 
+ if (navigator.serviceWorker) {
+ navigator.serviceWorker.register('/sw.js').then(function(reg) {
+   console.log('Yay!');
+ }).catch(function(err) {
+   console.log('Boo!');
+ })
+ }
+
+/**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
 document.addEventListener('DOMContentLoaded', (event) => {
@@ -142,6 +154,14 @@ createRestaurantHTML = (restaurant) => {
   image.className = 'restaurant-img';
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
   li.append(image);
+  
+  /*I am starting to alter the image constructor to use a picture tag, but I'm not sure this is required for the project. Checking into it and will return if there is time.
+  
+  const picture = document.createElement('picture');
+  const source = document.createElement('source');
+  const img = document.createElement('img');*/
+  
+  
 
   const name = document.createElement('h1');
   name.innerHTML = restaurant.name;
