@@ -11,16 +11,24 @@
      display: block;
    }
    
+   nav h1 a {
+     font-size: 1.5em;
+   }
 }
 
 @media screen and (min-width: 900px) {
   #restaurants-list li {
     max-width: 24%;
   }
+  
 }
 
 @media screen and (min-width: 1200px) {
   #restaurants-list li {
-    max-width: 17%;
+    max-width: 19%;
+  }
+  
+  nav h1 a {
+    font-size: 2em;
   }
 }
