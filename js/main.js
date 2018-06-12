@@ -153,6 +153,7 @@ createRestaurantHTML = (restaurant) => {
   const image = document.createElement('img');
   image.className = 'restaurant-img';
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  image.setAttribute("alt", restaurant.name);
   li.append(image);
   
   /*I am starting to alter the image constructor to use a picture tag, but I'm not sure this is required for the project. Checking into it and will return if there is time.
