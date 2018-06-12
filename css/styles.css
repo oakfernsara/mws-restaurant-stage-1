@@ -44,6 +44,20 @@ article, aside, canvas, details, figcaption, figure, footer, header, hgroup, men
 	width: 100%;
 }
 
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #f3f3f3;
+  color: orange;
+  padding: 8px;
+  z-index: 100;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
 .container {
   display: flex;
   flex-wrap: wrap;
