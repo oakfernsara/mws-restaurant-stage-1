@@ -16,6 +16,16 @@
    }
 }
 
+@media screen and (min-width: 700px) {
+  #restaurant-combined {
+    display: flex;
+  }
+  
+  #restaurant-main, #restaurant-info {
+    width: 50%;
+  }
+}
+
 @media screen and (min-width: 900px) {
   #restaurants-list li {
     max-width: 24%;
