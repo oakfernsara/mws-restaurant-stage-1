@@ -13,9 +13,9 @@
    
 }
 
-@media screen and (min-width: 800px) {
+@media screen and (min-width: 900px) {
   #restaurants-list li {
-    max-width: 21%;
+    max-width: 24%;
   }
 }
 
