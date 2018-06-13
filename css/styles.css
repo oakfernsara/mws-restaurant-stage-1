@@ -271,6 +271,7 @@ nav h1 a {
   padding: 5%;
   display: flex;
   flex-wrap: wrap;
+  width: auto;
 }
 #reviews-container {
   padding: 30px 40px 80px;
