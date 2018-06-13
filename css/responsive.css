@@ -1,6 +1,6 @@
 @media screen and (min-width: 600px) {
   #restaurants-list li {
-    max-width: 33%;
+    max-width: 38%;
   }
   
   .filter-options {
@@ -17,28 +17,72 @@
 }
 
 @media screen and (min-width: 700px) {
-  #restaurant-combined {
-    display: flex;
+  #restaurant-main {
+    width:50%;
+    padding: 15px;
   }
   
-  #restaurant-main, #restaurant-info {
-    width: 50%;
+  #restaurant-address{
+    order: -2;
+    width: 100%;
+  }
+  
+  #restaurant-name{
+    order:-3;
+  }
+  
+  #restaurant-hours {
+    max-width: 40%;
+    margin:auto;
   }
 }
+
 
 @media screen and (min-width: 900px) {
   #restaurants-list li {
     max-width: 24%;
   }
   
+  td {
+    font-size: 1.2rem;
+  }
+  
 }
 
 @media screen and (min-width: 1200px) {
+  
+  body {
+    width: 1200px;
+    margin: auto;
+  }
   #restaurants-list li {
     max-width: 19%;
   }
   
   nav h1 a {
     font-size: 2em;
+  }
+  
+  #restaurant-container {
+    max-width: 45%;
+  }
+  
+  .inside #map-container {
+  background: blue none repeat scroll 0 0;
+  height: 100%;
+  position: absolute;
+  right: 0;
+  top: 100px;
+  width: 50%;
+}
+
+  #restaurant-main {
+    width: 100%;
+    padding: 0;
+  }
+  
+  #restaurant-hours {
+    max-width: 100%;
+    margin: 0;
   }
 }
