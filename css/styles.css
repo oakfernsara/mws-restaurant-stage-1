@@ -41,7 +41,7 @@ h1, h2, h3, h4, h5, h6 {
   margin: 0 0 20px;
 }
 article, aside, canvas, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
-	width: auto;
+	width: 100%;
 }
 
 .skip-link {
@@ -274,6 +274,7 @@ nav h1 a {
 }
 #reviews-container {
   padding: 30px 40px 80px;
+  width: auto;
 }
 #reviews-container h2 {
   color: #f58500;
@@ -299,6 +300,10 @@ nav h1 a {
 }
 #reviews-list li p {
   margin: 0 0 10px;
+}
+
+#restaurant-hours {
+  width: 100%;
 }
 
 #restaurant-hours td {
