@@ -1,6 +1,8 @@
 /**
  * Add site files to the cache
  */
+ 
+ // ! Remove data/restaurants.json
 
 self.addEventListener('install', function(event) {
   event.waitUntil(
