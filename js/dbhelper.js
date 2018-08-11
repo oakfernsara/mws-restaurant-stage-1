@@ -1,8 +1,27 @@
+const database = 'restaurant';
+const storeName = 'restaurants';
+
+const get = url => {
+  return fetch(url);
+};
+
+const getJSON = url => {
+  return get(url).then(function(response) {
+    return response.json();
+  });
+};
+
+const dbPromise = idb.open(database, 1, function(upgradeDb) {
+  const dbKey = upgradeDb.createObjectStore(storeName, {
+    keyPath: 'id'
+  });
+});
+
 /**
  * Common database helper functions.
  */
 class DBHelper {
-
+ 
   /**
    * Database URL.
    * Change this to restaurants.json file location on your server.
@@ -15,12 +34,62 @@ class DBHelper {
    * Fetch all restaurants.
    */
    
-   // ! Change this to call the REST API with a fetch command
-  static fetchRestaurants(callback) {
+   static fetchRestaurants(callback) {
+     //fetch statement that produces json response, THEN take the response and add each entry to the database, catch errors along the way
+     getJSON(`${DBHelper.DATABASE_URL}`)
+     .catch(e => {
+       console.log(e);
+     })
+     .then(theseRest => {
+       console.log('The restaurants made it!', theseRest);
+       dbPromise.then(db => {
+         var tx = db.transaction(storeName, 'readwrite');
+         var restStore = tx.objectStore(storeName);
+         /**restStore.put({
+           id: theseRest[0].id,
+           data: theseRest[0]
+         });*/
+         console.log(theseRest[0].id);
+         theseRest.forEach(rest => {
+           var restData = restStore.put({
+             id: rest.id,
+             data: rest
+             
+           });
+           return restData;
+         });
+       }).catch(e => {
+         console.log(e);
+       });
+       callback(null, theseRest);
+     });
+     
+   }
+   
+  /**static fetchRestaurants(callback) {
    fetch(`${DBHelper.DATABASE_URL}`)
    .then(response => response.json())
-   .then(data => callback(null, data))
-  }
+   //.then(data => callback(null, data))
+   .then(restaurants => {
+     console.log('Here are the restaurants', restaurants);
+     const dbPromise = idb.open(database, 1, function(upgradeDb) {
+       const restKey = upgradeDb.createObjectStore(storeName, {
+         keyPath: 'id'
+       });
+     });
+     
+     dbPromise.then( db => {
+       
+       let tx = db.transaction(storeName, 'readwrite');
+       let restStore = tx.objectStore(storeName);
+       restaurants.forEach(thisRestaurant => {
+         let restAdd = restStore.put(thisRestaurant);
+         return restAdd;
+       });
+     });
+     callback(null, restaurants);
+   });
+  }*/
 
   /**
    * Fetch a restaurant by its ID.

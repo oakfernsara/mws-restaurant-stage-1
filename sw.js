@@ -2,6 +2,8 @@
  * Add site files to the cache
  */
  
+ // ! Add an import statement to pull in IDB library and make it accessible... also add const dbPromise...? Replace the const below with your actual code.
+ 
  // ! Remove data/restaurants.json
 
 self.addEventListener('install', function(event) {
@@ -18,7 +20,6 @@ self.addEventListener('install', function(event) {
         'css/styles.css',
         'css/responsive.css',
         'js/restaurant_info.js',
-        'data/restaurants.json',
         ]);
     })
     );
@@ -27,6 +28,8 @@ self.addEventListener('install', function(event) {
 /**
  * Add Service Worker
  */
+ 
+ // ! Fetch listener split is optional... but you can tell the service worker to respond differently to requests coming to port 1337
 
 self.addEventListener('fetch', function(event) {
   event.respondWith(
@@ -52,6 +55,8 @@ self.addEventListener('fetch', function(event) {
  /**
   * Cache Response
   */
+  
+  // ! Why is this empty?
  
   self.addEventListener('fetch', function(event) {
    event.respondWith(
