@@ -1,18 +1,8 @@
 const database = 'restaurant';
 const storeName = 'restaurants';
 
-const get = url => {
-  return fetch(url);
-};
-
-const getJSON = url => {
-  return get(url).then(function(response) {
-    return response.json();
-  });
-};
-
 const dbPromise = idb.open(database, 1, function(upgradeDb) {
-  const dbKey = upgradeDb.createObjectStore(storeName, {
+  return upgradeDb.createObjectStore(storeName, {
     keyPath: 'id'
   });
 });
@@ -36,60 +26,92 @@ class DBHelper {
    
    static fetchRestaurants(callback) {
      //fetch statement that produces json response, THEN take the response and add each entry to the database, catch errors along the way
-     getJSON(`${DBHelper.DATABASE_URL}`)
-     .catch(e => {
-       console.log(e);
-     })
-     .then(theseRest => {
-       console.log('The restaurants made it!', theseRest);
-       dbPromise.then(db => {
-         var tx = db.transaction(storeName, 'readwrite');
-         var restStore = tx.objectStore(storeName);
-         /**restStore.put({
-           id: theseRest[0].id,
-           data: theseRest[0]
-         });*/
-         console.log(theseRest[0].id);
-         theseRest.forEach(rest => {
-           var restData = restStore.put({
+     
+     /**dbPromise.then(db => {
+       if (db) {
+         console.log('Loading restaurants from IndexDB', db);
+         let tx = db.transaction(storeName);
+          let restStore = tx.objectStore(storeName);
+          console.log(restStore.getAll());
+          return restStore.getAll();
+       }
+       
+       else {
+         console.log('Loading restaurants from external server');
+         getJSON(`${DBHelper.DATABASE_URL}`)
+         .catch(e => {
+           console.log(e);
+         })
+         .then(theseRest => {
+           console.log('Got the restaurants!', theseRest);
+          let tx = db.transaction(storeName, 'readwrite');
+          let restStore = tx.objectStore(storeName);
+              theseRest.forEach(rest => {
+          let restData = restStore.put({
              id: rest.id,
              data: rest
-             
            });
-           return restData;
          });
+         return tx.complete;
+         }).catch(e => {
+           console.log(e);
+         });
+       }
+       }).then(final => {
+         console.log(final[0]);
+         callback(null, final);
        }).catch(e => {
          console.log(e);
+       });*/
+       
+     
+     
+     fetch(`http://localhost:1337/restaurants`)
+     .catch(e => {
+       console.log('Offline mode' + e);
+       return;
+     })
+     .then(response =>{
+       if (!response || response.status !== 200) {return}
+       return response.json();
+     })
+     .then(theseRest => {
+       if (theseRest) {
+       console.log('These restaurants are from the server', theseRest);
+       dbPromise.then(db => {
+         let tx = db.transaction(storeName, 'readwrite');
+         let restStore = tx.objectStore(storeName);
+         theseRest.forEach(rest => {
+           let restData = restStore.put({
+             id: rest.id,
+             data: rest
+           });
+         });
+       }).then( () => {
+         console.log('theseRest', theseRest);
+         callback(null, theseRest);
        });
-       callback(null, theseRest);
+       
+       } else {
+         console.log('No response from the network');
+         dbPromise.then(db => {
+           let tx = db.transaction(storeName);
+           let restStore = tx.objectStore(storeName);
+            
+          //return restStore.getAll();
+          restStore.getAll().then(data => {
+            console.log('the .then on restStore.getAll() is returning',data);
+            let finalData = data.map(values => {
+              return values.data;
+            });
+            console.log('finalData is', finalData)
+            callback(null, finalData);
+          });
+         });
+       }
      });
      
    }
-   
-  /**static fetchRestaurants(callback) {
-   fetch(`${DBHelper.DATABASE_URL}`)
-   .then(response => response.json())
-   //.then(data => callback(null, data))
-   .then(restaurants => {
-     console.log('Here are the restaurants', restaurants);
-     const dbPromise = idb.open(database, 1, function(upgradeDb) {
-       const restKey = upgradeDb.createObjectStore(storeName, {
-         keyPath: 'id'
-       });
-     });
-     
-     dbPromise.then( db => {
-       
-       let tx = db.transaction(storeName, 'readwrite');
-       let restStore = tx.objectStore(storeName);
-       restaurants.forEach(thisRestaurant => {
-         let restAdd = restStore.put(thisRestaurant);
-         return restAdd;
-       });
-     });
-     callback(null, restaurants);
-   });
-  }*/
 
   /**
    * Fetch a restaurant by its ID.
@@ -210,9 +232,16 @@ class DBHelper {
    * Restaurant image URL.
    */
    
-   // ! Add the image extension
   static imageUrlForRestaurant(restaurant) {
     return (`/img/${restaurant.photograph}.jpg`);
+  }
+  
+  static imageUrlForSrcset(restaurant) {
+    return [
+      `/img/resize/${restaurant.photograph}-large.jpg`,
+      `/img/resize/${restaurant.photograph}-medium.jpg`,
+      `/img/resize/${restaurant.photograph}-small.jpg`
+      ]
   }
 
   /**

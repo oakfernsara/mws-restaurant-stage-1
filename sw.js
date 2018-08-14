@@ -32,17 +32,23 @@ self.addEventListener('install', function(event) {
  // ! Fetch listener split is optional... but you can tell the service worker to respond differently to requests coming to port 1337
 
 self.addEventListener('fetch', function(event) {
+  
+  if (event.request.url.startsWith('http://localhost:1337')) {
+        console.log("that is the database's job");
+        return;
+      }
+      
   event.respondWith(
     caches.match(event.request).then(function(response) {
       
       if (response) {
-        console.log('got it!', response);
-        return response
+        return response;
       }
       
-      console.log('fetching from network')
+      console.log('fetching from network');
       
       return fetch(event.request).then(function(fetchResp) {
+      
         return caches.open('mws-restaurant-stage-1').then(function(cache) {
           cache.put(event.request, fetchResp.clone());
           return fetchResp;
@@ -51,15 +57,3 @@ self.addEventListener('fetch', function(event) {
     })
     );
 });
- 
- /**
-  * Cache Response
-  */
-  
-  // ! Why is this empty?
- 
-  self.addEventListener('fetch', function(event) {
-   event.respondWith(
-     
-     );
- });
