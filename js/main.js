@@ -1,7 +1,7 @@
 let restaurants,
   neighborhoods,
   cuisines;
-var map;
+var newMap;
 var markers = [];
 
 /**
@@ -10,9 +10,9 @@ var markers = [];
  
  if (navigator.serviceWorker) {
  navigator.serviceWorker.register('/sw.js').then(function(reg) {
-   console.log('Yay!');
+   console.log('Service worker has registered!');
  }).catch(function(err) {
-   console.log('Boo!');
+   console.log('Service worker has failed to register');
  });
  }
  
@@ -20,6 +20,7 @@ var markers = [];
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
 document.addEventListener('DOMContentLoaded', (event) => {
+  initMap();
   fetchNeighborhoods();
   fetchCuisines();
 });
@@ -80,19 +81,23 @@ fillCuisinesHTML = (cuisines = self.cuisines) => {
 };
 
 /**
- * Initialize Google map, called from HTML.
+ * Initialize leaflet map, called from HTML.
  */
-window.initMap = () => {
-  let loc = {
-    lat: 40.722216,
-    lng: -73.987501
-  };
-  self.map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 12,
-    center: loc,
-    scrollwheel: false
-  });
-  updateRestaurants();
+initMap = () => {
+  self.newMap = L.map('map', {
+        center: [40.722216, -73.987501],
+        zoom: 12,
+        scrollWheelZoom: false
+      });
+  L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.jpg70?access_token={mapboxToken}', {
+    mapboxToken: 'pk.eyJ1Ijoib2FrZmVybnNhcmEiLCJhIjoiY2psMm9sNGo5MXNxZDNxcWoyc3BoeWxnaiJ9.Wad3aJdiqA83uPQulmlmYA',
+    maxZoom: 18,
+    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+      '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+      'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    id: 'mapbox.streets'
+  }).addTo(newMap);
+   updateRestaurants();
 };
 
 /**
@@ -150,19 +155,31 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
 createRestaurantHTML = (restaurant) => {
   const li = document.createElement('li');
 
-  const image = document.createElement('img');
+  /**const image = document.createElement('img');
   image.className = 'restaurant-img';
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
-  image.srcset = //add the images using 1-large.jpg, 1-medium.jpg, 1-small.jpg
+  image.srcset = DBHelper.imageUrlForSrcset(restaurant);
+  image.sizes = "(max-width: 500px) 100vw, (min-width: 501px) 50vw, (min-wdith: 900px) 33vw, (min-width: 1200px"
   image.setAttribute("alt", restaurant.name);
-  li.append(image);
+  li.append(image);*/
   
-  /*I am starting to alter the image constructor to use a picture tag, but I'm not sure this is required for the project. Checking into it and will return if there is time.
+  /*I am starting to alter the image constructor to use a picture tag, but I'm not sure this is required for the project. Checking into it and will return if there is time.*/
   
   const picture = document.createElement('picture');
   const source = document.createElement('source');
-  const img = document.createElement('img');*/
+  source.srcset = DBHelper.imageUrlforWebp(restaurant);
+  source.type = 'image/webp';
+  const image = document.createElement('img');
   
+  image.className = 'restaurant-img';
+  image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  image.srcset = DBHelper.imageUrlForSrcset(restaurant);
+  image.sizes = "(max-width: 500px) 100vw, (min-width: 501px) 50vw, (min-wdith: 900px) 33vw";
+  image.setAttribute("alt", restaurant.name);
+  
+  picture.append(source, image);
+  
+  li.append(picture);
   
 
   const name = document.createElement('h2');
@@ -193,10 +210,10 @@ createRestaurantHTML = (restaurant) => {
 addMarkersToMap = (restaurants = self.restaurants) => {
   restaurants.forEach(restaurant => {
     // Add marker to the map
-    const marker = DBHelper.mapMarkerForRestaurant(restaurant, self.map);
-    google.maps.event.addListener(marker, 'click', () => {
-      window.location.href = marker.url
-    });
-    self.markers.push(marker);
+    const marker = DBHelper.mapMarkerForRestaurant(restaurant, self.newMap);
+    marker.on("click", onClick);
+    function onClick() {
+      window.location.href = marker.options.url;
+    }
   });
 }

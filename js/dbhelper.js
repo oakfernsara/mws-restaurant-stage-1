@@ -25,47 +25,6 @@ class DBHelper {
    */
    
    static fetchRestaurants(callback) {
-     //fetch statement that produces json response, THEN take the response and add each entry to the database, catch errors along the way
-     
-     /**dbPromise.then(db => {
-       if (db) {
-         console.log('Loading restaurants from IndexDB', db);
-         let tx = db.transaction(storeName);
-          let restStore = tx.objectStore(storeName);
-          console.log(restStore.getAll());
-          return restStore.getAll();
-       }
-       
-       else {
-         console.log('Loading restaurants from external server');
-         getJSON(`${DBHelper.DATABASE_URL}`)
-         .catch(e => {
-           console.log(e);
-         })
-         .then(theseRest => {
-           console.log('Got the restaurants!', theseRest);
-          let tx = db.transaction(storeName, 'readwrite');
-          let restStore = tx.objectStore(storeName);
-              theseRest.forEach(rest => {
-          let restData = restStore.put({
-             id: rest.id,
-             data: rest
-           });
-         });
-         return tx.complete;
-         }).catch(e => {
-           console.log(e);
-         });
-       }
-       }).then(final => {
-         console.log(final[0]);
-         callback(null, final);
-       }).catch(e => {
-         console.log(e);
-       });*/
-       
-     
-     
      fetch(`http://localhost:1337/restaurants`)
      .catch(e => {
        console.log('Offline mode' + e);
@@ -88,7 +47,6 @@ class DBHelper {
            });
          });
        }).then( () => {
-         console.log('theseRest', theseRest);
          callback(null, theseRest);
        });
        
@@ -233,28 +191,30 @@ class DBHelper {
    */
    
   static imageUrlForRestaurant(restaurant) {
-    return (`/img/${restaurant.photograph}.jpg`);
+    return (`/img/${restaurant.id}.jpg`);
+  }
+  
+  static imageUrlforWebp(restaurant) {
+    return (`/img/webp/${restaurant.id}.webp`);
   }
   
   static imageUrlForSrcset(restaurant) {
-    return [
-      `/img/resize/${restaurant.photograph}-large.jpg`,
-      `/img/resize/${restaurant.photograph}-medium.jpg`,
-      `/img/resize/${restaurant.photograph}-small.jpg`
-      ]
+    return `/img/resize/${restaurant.id}-large.jpg 800w,
+      /img/resize/${restaurant.id}-medium.jpg 640w,
+      /img/resize/${restaurant.id}-small.jpg 320w`;
   }
 
   /**
    * Map marker for a restaurant.
    */
   static mapMarkerForRestaurant(restaurant, map) {
-    const marker = new google.maps.Marker({
-      position: restaurant.latlng,
-      title: restaurant.name,
-      url: DBHelper.urlForRestaurant(restaurant),
-      map: map,
-      animation: google.maps.Animation.DROP}
-    );
+    // https://leafletjs.com/reference-1.3.0.html#marker
+    const marker = new L.marker([restaurant.latlng.lat, restaurant.latlng.lng],
+      {title: restaurant.name,
+      alt: restaurant.name,
+      url: DBHelper.urlForRestaurant(restaurant)
+      })
+      marker.addTo(newMap);
     return marker;
   }
 

@@ -22,6 +22,7 @@
     "sails": "^1.0.2"
   },
   "devDependencies": {
+    "grunt-cwebp": "^2.1.1",
     "grunt-responsive-images": "^1.10.1"
   }
 }
