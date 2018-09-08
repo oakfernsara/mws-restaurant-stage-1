@@ -176,3 +176,14 @@ getParameterByName = (name, url) => {
     return '';
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
 }
+/**
+ * Reviews
+ */
+  
+  
+  const reviewDiv = document.getElementById('review-form');
+  const revBtn = document.getElementById('rev-btn');
+ 
+ revBtn.onclick = () => {
+   reviewDiv.style.display = "block";
+ }

@@ -1,10 +1,15 @@
 const database = 'restaurant';
-const storeName = 'restaurants';
+const restStore = 'restaurants';
+const revStore = 'reviews'
 
-const dbPromise = idb.open(database, 1, function(upgradeDb) {
-  return upgradeDb.createObjectStore(storeName, {
-    keyPath: 'id'
-  });
+const dbPromise = idb.open(database, 2, function(upgradeDb) {
+  switch(upgradeDb.oldVersion) {
+    case 0:
+      upgradeDb.createObjectStore(restStore, {keyPath: 'id'});
+      /* falls through */
+    case 1:
+      upgradeDb.createObjectStore(revStore, {keyPath: 'id'});
+  }
 });
 
 /**
@@ -18,6 +23,10 @@ class DBHelper {
    */
   static get DATABASE_URL() {
     return `http://localhost:1337/restaurants`;
+  }
+  
+  static get REVIEW_URL() {
+    return `http://localhost:1337/reviews`
   }
 
   /**
@@ -38,10 +47,10 @@ class DBHelper {
        if (theseRest) {
        console.log('These restaurants are from the server', theseRest);
        dbPromise.then(db => {
-         let tx = db.transaction(storeName, 'readwrite');
-         let restStore = tx.objectStore(storeName);
+         let tx = db.transaction(restStore, 'readwrite');
+         let thisStore = tx.objectStore(restStore);
          theseRest.forEach(rest => {
-           let restData = restStore.put({
+           let restData = thisStore.put({
              id: rest.id,
              data: rest
            });
@@ -53,8 +62,8 @@ class DBHelper {
        } else {
          console.log('No response from the network');
          dbPromise.then(db => {
-           let tx = db.transaction(storeName);
-           let restStore = tx.objectStore(storeName);
+           let tx = db.transaction(restStore);
+           let thisStore = tx.objectStore(restStore);
             
           //return restStore.getAll();
           restStore.getAll().then(data => {
@@ -70,6 +79,21 @@ class DBHelper {
      });
      
    }
+   
+   //!Working on this fetchReviews, probably going to create a cleaner function to get either restaurants or reviews, whatever's clever.
+   
+   static fetchReviews(callback) {
+     fetch(`http://localhost:1337/reviews`)
+     .catch(e => {
+       console.log('Offline mode' + e);
+       return;
+     })
+     .then(theseRev => {
+       callback(null, theseRev);
+     });
+   }
+   
+   
 
   /**
    * Fetch a restaurant by its ID.
@@ -82,6 +106,7 @@ class DBHelper {
       } else {
         const restaurant = restaurants.find(r => r.id == id);
         if (restaurant) { // Got the restaurant
+          console.log(restaurant);
           callback(null, restaurant);
         } else { // Restaurant does not exist in the database
           callback('Restaurant does not exist', null);
@@ -89,6 +114,23 @@ class DBHelper {
       }
     });
   }
+  
+  //Beginnings of a clone of fetchRestaurantById, but I'm not sure this is what I'm supposed to do.
+  
+  /**
+   * Fetch reviews by a restaurant's id
+   */
+  
+ /* static fetchReviewsByID(id, callback) {
+     fetch(`http://localhost:1337/reviews/?restaurant_id=${id}`)
+     .catch(e => {
+       console.log('Reviews being fetched in offline mode' + e);
+     })
+     .then(response => {
+       if (!response || response.status !== 200) {return}
+       return response.json();
+     }).then()
+   }*/
 
   /**
    * Fetch restaurants by a cuisine type with proper error handling.

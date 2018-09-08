@@ -310,3 +310,21 @@ nav h1 a {
 #restaurant-hours td {
   color: #666;
 }
+
+#review-form {
+  display: none;
+}
+
+#add-review {
+  width:100%;
+}
+
+#rev-btn {
+  width: 80%;
+  margin: 0 10%;
+}
+
+#review-form{
+  width: 100%;
+  margin: 30px;
+}
