@@ -64,7 +64,20 @@ fetchRestaurantFromURL = (callback) => {
  */
 fillRestaurantHTML = (restaurant = self.restaurant) => {
   const name = document.getElementById('restaurant-name');
-  name.innerHTML = restaurant.name;
+  const favStatus = restaurant.is_favorite;
+  name.innerHTML = restaurant.name + '<button class="fas fa-heart" id="fav-heart" name="is a favorite"></button>';
+  
+  console.log("restaurant.is_favorite is", restaurant.is_favorite)
+  
+  const favHeart = document.getElementById('fav-heart');
+  restaurant.is_favorite === true
+    ? favHeart.classList.add('fav')
+    : favHeart.name = "not a favorite"
+ favHeart.onclick = () => {
+   favHeart.classList.toggle('fav')
+   favHeart.name = "is a favorite"
+   favoriteClick(restaurant.id);
+ }
 
   const address = document.getElementById('restaurant-address');
   address.innerHTML = restaurant.address;
@@ -82,6 +95,7 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
     fillRestaurantHoursHTML();
   }
   // fill reviews
+ 
   fillReviewsHTML();
 }
 
@@ -177,7 +191,7 @@ getParameterByName = (name, url) => {
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
 }
 /**
- * Reviews
+ * Review Form Functionality
  */
   
   
@@ -187,3 +201,39 @@ getParameterByName = (name, url) => {
  revBtn.onclick = () => {
    reviewDiv.style.display = "block";
  }
+ 
+ const revSubmit = document.getElementById('review-submit')
+ 
+revSubmit.onclick = (restaurant = self.restaurant) => {
+  event.preventDefault();
+   const form = document.getElementById("rev-form").elements;
+   const revName = form.namedItem('name').value;
+   const rating = form.namedItem('rating').value;
+   const comments = form.namedItem('comments').value;
+   const id = getParameterByName('id');
+   
+   let review = {restaurant_id: id, name: revName, rating: rating, comments: comments}
+   
+   DBHelper.createReview(review);
+    
+ }
+ 
+ /**
+  * Favorite Functionality
+  */
+  
+favoriteClick = (id) => {
+  const favStatus = document.getElementById('fav-heart')
+  const classList = favStatus.classList
+  let status = true;
+  classList.contains("fav")
+    ? ( status = true,
+      console.log("we have a favorite!", id)
+    ) : ( status = false,
+      console.log("we do not have a favorite!", id)
+      );
+      
+      console.log("favoriteClick status is", status)
+      
+  DBHelper.updateFavorite(id, status)
+}

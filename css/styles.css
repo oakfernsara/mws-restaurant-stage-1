@@ -313,6 +313,19 @@ nav h1 a {
 
 #review-form {
   display: none;
+  width: 100%;
+  margin: 30px;
+}
+
+label {
+  padding-right: 50%;
+}
+
+button, input[type="submit"] {
+  border: none;
+  padding:15px 32px;
+  font-size: 16px;
+  margin: 10px 0;
 }
 
 #add-review {
@@ -324,7 +337,20 @@ nav h1 a {
   margin: 0 10%;
 }
 
-#review-form{
-  width: 100%;
-  margin: 30px;
+#review-comments {
+  height: 200px;
+}
+
+#fav-heart {
+  padding-left: 5%;
+  color: rgb(193, 186, 170, .5);
+  border-radius: 50%;
+  background: none;
+  border: none;
+  font-size: 1em;
+  outline: none;
+}
+
+.fav::before {
+  color: red;
 }

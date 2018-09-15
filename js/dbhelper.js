@@ -1,6 +1,6 @@
 const database = 'restaurant';
 const restStore = 'restaurants';
-const revStore = 'reviews'
+const revStore = 'reviews';
 
 const dbPromise = idb.open(database, 2, function(upgradeDb) {
   switch(upgradeDb.oldVersion) {
@@ -26,7 +26,7 @@ class DBHelper {
   }
   
   static get REVIEW_URL() {
-    return `http://localhost:1337/reviews`
+    return `http://localhost:1337/reviews`;
   }
 
   /**
@@ -71,7 +71,7 @@ class DBHelper {
             let finalData = data.map(values => {
               return values.data;
             });
-            console.log('finalData is', finalData)
+            console.log('finalData is', finalData);
             callback(null, finalData);
           });
          });
@@ -80,18 +80,22 @@ class DBHelper {
      
    }
    
-   //!Working on this fetchReviews, probably going to create a cleaner function to get either restaurants or reviews, whatever's clever.
+   //!Working on this fetchReviews, probably going to create a cleaner function to get either restaurants or reviews, whatever's clever. But at the same time, I don't think I need to fetch all of the reviews at once? The server can do that for me.
    
-   static fetchReviews(callback) {
+   /*static fetchReviews(callback) {
      fetch(`http://localhost:1337/reviews`)
+     
      .catch(e => {
        console.log('Offline mode' + e);
        return;
      })
-     .then(theseRev => {
-       callback(null, theseRev);
+     
+     })
+     .then(response => {
+       console.log('Passing reviews to callback')
+       callback(null, response);
      });
-   }
+   }*/
    
    
 
@@ -121,7 +125,7 @@ class DBHelper {
    * Fetch reviews by a restaurant's id
    */
   
- /* static fetchReviewsByID(id, callback) {
+/* static fetchReviewsByID(id, callback) {
      fetch(`http://localhost:1337/reviews/?restaurant_id=${id}`)
      .catch(e => {
        console.log('Reviews being fetched in offline mode' + e);
@@ -195,9 +199,9 @@ class DBHelper {
         callback(error, null);
       } else {
         // Get all neighborhoods from all restaurants
-        const neighborhoods = restaurants.map((v, i) => restaurants[i].neighborhood)
+        const neighborhoods = restaurants.map((v, i) => restaurants[i].neighborhood);
         // Remove duplicates from neighborhoods
-        const uniqueNeighborhoods = neighborhoods.filter((v, i) => neighborhoods.indexOf(v) == i)
+        const uniqueNeighborhoods = neighborhoods.filter((v, i) => neighborhoods.indexOf(v) == i);
         callback(null, uniqueNeighborhoods);
       }
     });
@@ -213,9 +217,9 @@ class DBHelper {
         callback(error, null);
       } else {
         // Get all cuisines from all restaurants
-        const cuisines = restaurants.map((v, i) => restaurants[i].cuisine_type)
+        const cuisines = restaurants.map((v, i) => restaurants[i].cuisine_type);
         // Remove duplicates from cuisines
-        const uniqueCuisines = cuisines.filter((v, i) => cuisines.indexOf(v) == i)
+        const uniqueCuisines = cuisines.filter((v, i) => cuisines.indexOf(v) == i);
         callback(null, uniqueCuisines);
       }
     });
@@ -255,9 +259,40 @@ class DBHelper {
       {title: restaurant.name,
       alt: restaurant.name,
       url: DBHelper.urlForRestaurant(restaurant)
-      })
+      });
       marker.addTo(newMap);
     return marker;
   }
 
+
+/**
+ * Update Favorite Data
+ */
+ 
+ static updateFavorite(id, newState) {
+   console.log('updateFavorite running');
+   const url = `http://localhost:1337/${id}/?is_favorite=${newState}`;
+   const method = "PUT";
+   
+   dbPromise.then(db => {
+     const tx = db.transaction(restStore, 'readwrite');
+     
+     tx.objectStore(restStore).put({
+       id: id,
+       "is_favorite": newState
+     });
+     console.log('Added update to database');
+   });
+ }
+ 
+ 
+ /**
+  * Create Review
+  */
+  
+  static createReview(data) {
+    console.log(data);
+  }
+  
+  
 }
