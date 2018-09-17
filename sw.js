@@ -1,3 +1,5 @@
+const staticCacheName = 'mws-restaurant-stage-1'
+
 /**
  * Add site files to the cache
  */
@@ -8,7 +10,7 @@
 
 self.addEventListener('install', function(event) {
   event.waitUntil(
-    caches.open('mws-restaurant-stage-1').then(function(cache) {
+    caches.open(staticCacheName).then(function(cache) {
       console.log("Cache opened")
       return cache.addAll([
         '/',

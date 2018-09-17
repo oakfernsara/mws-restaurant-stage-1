@@ -63,6 +63,7 @@ fetchRestaurantFromURL = (callback) => {
  * Create restaurant HTML and add it to the webpage
  */
 fillRestaurantHTML = (restaurant = self.restaurant) => {
+  DBHelper.updatePending();
   const name = document.getElementById('restaurant-name');
   const favStatus = restaurant.is_favorite;
   name.innerHTML = restaurant.name + '<button class="fas fa-heart" id="fav-heart" name="is a favorite"></button>';
@@ -70,12 +71,11 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   console.log("restaurant.is_favorite is", restaurant.is_favorite)
   
   const favHeart = document.getElementById('fav-heart');
-  restaurant.is_favorite === true
+  restaurant.is_favorite === "true"
     ? favHeart.classList.add('fav')
-    : favHeart.name = "not a favorite"
+    : favHeart.classList.remove('fav');
  favHeart.onclick = () => {
    favHeart.classList.toggle('fav')
-   favHeart.name = "is a favorite"
    favoriteClick(restaurant.id);
  }
 
@@ -95,8 +95,7 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
     fillRestaurantHoursHTML();
   }
   // fill reviews
- 
-  fillReviewsHTML();
+  
 }
 
 /**
@@ -122,7 +121,7 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
 /**
  * Create all reviews HTML and add them to the webpage.
  */
-fillReviewsHTML = (reviews = self.restaurant.reviews) => {
+fillReviewsHTML = (reviews) => {
   const container = document.getElementById('reviews-container');
   const title = document.createElement('h3');
   title.innerHTML = 'Reviews';

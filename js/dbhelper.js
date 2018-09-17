@@ -1,14 +1,19 @@
 const database = 'restaurant';
 const restStore = 'restaurants';
 const revStore = 'reviews';
+const pendStore = 'pending'
 
-const dbPromise = idb.open(database, 2, function(upgradeDb) {
+const dbPromise = idb.open(database, 3, function(upgradeDb) {
   switch(upgradeDb.oldVersion) {
     case 0:
       upgradeDb.createObjectStore(restStore, {keyPath: 'id'});
       /* falls through */
     case 1:
-      upgradeDb.createObjectStore(revStore, {keyPath: 'id'});
+      upgradeDb.createObjectStore(revStore, {keyPath: 'id'}
+        );
+    case 2:
+      upgradeDb.createObjectStore(pendStore, {keyPath: 'id'}
+      );
   }
 });
 
@@ -27,6 +32,35 @@ class DBHelper {
   
   static get REVIEW_URL() {
     return `http://localhost:1337/reviews`;
+  }
+  
+  static updatePending() {
+    dbPromise.then(db => {
+      const store = db.transaction(pendStore, 'readwrite').objectStore(pendStore);
+      store
+        .openCursor()
+        .then(cursor => {
+          if (!cursor) {
+            return;
+          }
+        const update = cursor.value;
+        console.log("cursor.value is", cursor.value);
+        const url = update.url;
+        const method = update.method;
+        const id = update.id;
+        
+        fetch(url, {method}).then((response) => {
+          if (!response.ok && !response.redirected) {
+            return;
+          }
+        }).then(() => {
+          const delPend = db.transaction(pendStore, 'readwrite').objectStore(pendStore);
+          delPend.openCursor().then(cursor => {
+            cursor.delete();
+          });
+        });
+        });
+    });
   }
 
   /**
@@ -66,7 +100,7 @@ class DBHelper {
            let thisStore = tx.objectStore(restStore);
             
           //return restStore.getAll();
-          restStore.getAll().then(data => {
+          thisStore.getAll().then(data => {
             console.log('the .then on restStore.getAll() is returning',data);
             let finalData = data.map(values => {
               return values.data;
@@ -80,25 +114,6 @@ class DBHelper {
      
    }
    
-   //!Working on this fetchReviews, probably going to create a cleaner function to get either restaurants or reviews, whatever's clever. But at the same time, I don't think I need to fetch all of the reviews at once? The server can do that for me.
-   
-   /*static fetchReviews(callback) {
-     fetch(`http://localhost:1337/reviews`)
-     
-     .catch(e => {
-       console.log('Offline mode' + e);
-       return;
-     })
-     
-     })
-     .then(response => {
-       console.log('Passing reviews to callback')
-       callback(null, response);
-     });
-   }*/
-   
-   
-
   /**
    * Fetch a restaurant by its ID.
    */
@@ -119,22 +134,57 @@ class DBHelper {
     });
   }
   
-  //Beginnings of a clone of fetchRestaurantById, but I'm not sure this is what I'm supposed to do.
-  
   /**
-   * Fetch reviews by a restaurant's id
+   * Fetch Reviews by ID
    */
-  
-/* static fetchReviewsByID(id, callback) {
-     fetch(`http://localhost:1337/reviews/?restaurant_id=${id}`)
-     .catch(e => {
-       console.log('Reviews being fetched in offline mode' + e);
+   
+   static fetchReviewsById(id) {
+     fetch('http://localhost:1337/reviews/', {
+       'restaurant_id': id
+     }).then(result => {
+       return result.json();
      })
-     .then(response => {
-       if (!response || response.status !== 200) {return}
-       return response.json();
-     }).then()
-   }*/
+   }
+  
+  /*static fetchReviewsById(id, callback) {
+    fetch('http://localhost:1337/reviews/', {
+      "restaurant_id": id
+    }).then(response => {
+      if (!response || response.status !== 200) {return}
+      return response.json();
+    }).then(theseReviews => {
+      if (theseReviews) {
+      dbPromise.then(db => {
+        let store = db.transaction(revStore, 'readwrite').objectStore(revStore);
+        theseReviews.forEach(review => {
+          store.put({
+            id: review.id,
+            data: review
+          });
+        });
+      }).then(() => {
+        callback(null, theseReviews)
+      })
+      } else {
+        results = [];
+        dbPromise.then(db => {
+          let store = db.transaction(revStore).objectStore(revStore);
+          let revIndex = store.index('restaurant_id');
+          let thisKey = IDBKeyRange.only(id);
+          index.openCursor(thisKey).onsuccess = event => {
+            let cursor = event.target.result
+            console.log(cursor);
+            results.push(event);
+          }
+          return results;
+        }).then(reviews => {
+          console.log(reviews);
+          callback(null, reviews);
+        })
+      }
+    });
+  }*/
+
 
   /**
    * Fetch restaurants by a cuisine type with proper error handling.
@@ -271,17 +321,32 @@ class DBHelper {
  
  static updateFavorite(id, newState) {
    console.log('updateFavorite running');
-   const url = `http://localhost:1337/${id}/?is_favorite=${newState}`;
+   const url = `http://localhost:1337/restaurants/${id}/?is_favorite=${newState}`;
    const method = "PUT";
    
    dbPromise.then(db => {
-     const tx = db.transaction(restStore, 'readwrite');
+     const store = db.transaction(restStore, 'readwrite').objectStore(restStore);
      
-     tx.objectStore(restStore).put({
-       id: id,
-       "is_favorite": newState
+     store.get(id).then(result => {
+       //get returns a promise with result.data as the object I need to edit and then send back to store.put... otherwise I just overwrite all of the data with just the favorite.
+         result.data.is_favorite = newState;
+       store.put(result);
+       console.log("The info going to the database is", result);
      });
-     console.log('Added update to database');
+     
+     console.log('Added favorite to database');
+   });
+   
+   fetch(url, {
+     method
+   }).catch( () => {
+    
+       dbPromise.then(db => {
+         const store = db.transaction(pendStore, 'readwrite').objectStore(pendStore);
+         
+         console.log('No response from server, adding this to pending database', url, method);
+         store.put({id, url, method});
+       });
    });
  }
  
@@ -292,6 +357,20 @@ class DBHelper {
   
   static createReview(data) {
     console.log(data);
+    
+    dbPromise.then(db => {
+      const tx = db.transaction(revStore, 'readwrite');
+      
+      const id = data.restaurant_id;
+      
+      tx.objectStore(revStore).put({
+        id: Number(id),
+        name: data.name,
+        rating: Number(data.rating),
+        comments: data.comments
+      });
+      console.log('Added review to database');
+    });
   }
   
   
