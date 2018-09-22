@@ -7,6 +7,7 @@ var newMap;
  
  document.addEventListener('DOMContentLoaded', (event) => {
   initMap();
+  DBHelper.updatePending();
 });
 
 
@@ -63,7 +64,6 @@ fetchRestaurantFromURL = (callback) => {
  * Create restaurant HTML and add it to the webpage
  */
 fillRestaurantHTML = (restaurant = self.restaurant) => {
-  DBHelper.updatePending();
   const name = document.getElementById('restaurant-name');
   const favStatus = restaurant.is_favorite;
   name.innerHTML = restaurant.name + '<button class="fas fa-heart" id="fav-heart" name="is a favorite"></button>';
@@ -96,10 +96,10 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   }
   // fill reviews
   const id = restaurant.id;
-  DBHelper.fetchReviewsById(id, (error, review) => {
-    console.log("DBHelper is sending", review);
-      self.reviews = review;
-      if (!review) {
+  DBHelper.fetchReviewsById(id, (error, reviews) => {
+    console.log("DBHelper is sending", reviews);
+      self.reviews = reviews;
+      if (!reviews) {
         console.error(error);
         return;
       }
@@ -148,15 +148,17 @@ fillReviewsHTML = (reviews = self.reviews) => {
     ul.appendChild(createReviewHTML(review));
   });
   container.appendChild(ul);
-}
+};
 
 /**
  * Create review HTML and add it to the webpage.
  */
 createReviewHTML = (review) => {
+  console.log('adding review HTML', review);
   const li = document.createElement('li');
   const name = document.createElement('p');
   name.innerHTML = review.name;
+  console.log('review.name is', review.name);
   li.appendChild(name);
 
   const date = document.createElement('p');
@@ -209,22 +211,25 @@ getParameterByName = (name, url) => {
   const revBtn = document.getElementById('rev-btn');
  
  revBtn.onclick = () => {
+   
    reviewDiv.style.display = "block";
  }
  
  const revSubmit = document.getElementById('review-submit')
+ const id = getParameterByName('id');
  
-revSubmit.onclick = (restaurant = self.restaurant) => {
+revSubmit.onclick = () => {
   event.preventDefault();
    const form = document.getElementById("rev-form").elements;
    const revName = form.namedItem('name').value;
    const rating = form.namedItem('rating').value;
    const comments = form.namedItem('comments').value;
-   const id = getParameterByName('id');
+   
    
    let review = {restaurant_id: id, name: revName, rating: rating, comments: comments}
    
    DBHelper.createReview(review);
+   document.getElementById('reviews-list').appendChild(createReviewHTML(review));
     
  }
  

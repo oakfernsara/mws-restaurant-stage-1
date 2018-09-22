@@ -9,10 +9,10 @@ const dbPromise = idb.open(database, 3, function(upgradeDb) {
       upgradeDb.createObjectStore(restStore, {keyPath: 'id'});
       /* falls through */
     case 1:
-      upgradeDb.createObjectStore(revStore, {keyPath: 'id'}
+      upgradeDb.createObjectStore(revStore, {keyPath: 'id', autoIncrement:true}
         );
     case 2:
-      upgradeDb.createObjectStore(pendStore, {keyPath: 'id'}
+      upgradeDb.createObjectStore(pendStore, {autoIncrement:true}
       );
   }
 });
@@ -48,8 +48,11 @@ class DBHelper {
         const url = update.url;
         const method = update.method;
         const id = update.id;
+        const params = update.data;
         
-        fetch(url, {method}).then((response) => {
+        if (id) {
+          console.log('updatePending() found an id!', id)
+          fetch(url, {method}).then((response) => {
           if (!response.ok && !response.redirected) {
             return;
           }
@@ -59,6 +62,21 @@ class DBHelper {
             cursor.delete();
           });
         });
+        }
+        
+        if (params) {
+          console.log('updatePending() found some params!', params)
+          fetch(url, {method, params}).then((response) => {
+            if (!response.ok && !response.redirected) {
+              return;
+            }
+          }).then(() => {
+            const delPend = db.transaction(pendStore, 'readwrite').objectStore(pendStore);
+            delPend.openCursor().then(cursor => {
+              cursor.delete();
+            })
+          })
+        }
         });
     });
   }
@@ -149,7 +167,21 @@ class DBHelper {
      .then(theseRevs => {
        if (theseRevs) {
          console.log('These reviews are from the server', theseRevs);
-         callback(null, theseRevs);
+         dbPromise.then(db => {
+           let store = db.transaction(revStore, 'readwrite').objectStore(revStore);
+           theseRevs.forEach(review => {
+             store.put({
+               id: review.id,
+               data: review
+             });
+           });
+         }).then(() => {
+           callback(null, theseRevs);
+         });
+       } else {
+         results = [];
+         dbPromise.then(db => {
+         })
        }
      });
    }
@@ -364,20 +396,27 @@ class DBHelper {
   */
   
   static createReview(data) {
-    console.log(data);
+    console.log('createReview is running with', data);
+    const url = `http://localhost:1337/reviews/`
+    const method = 'POST'
     
     dbPromise.then(db => {
       const tx = db.transaction(revStore, 'readwrite');
       
       const id = data.restaurant_id;
       
-      tx.objectStore(revStore).put({
-        id: Number(id),
-        name: data.name,
-        rating: Number(data.rating),
-        comments: data.comments
-      });
+      tx.objectStore(revStore).put({data});
       console.log('Added review to database');
+    });
+    
+    fetch(url, {data}).catch( () => {
+      dbPromise.then(db => {
+        const store = db.transaction(pendStore, 'readwrite').objectStore(pendStore);
+        console.log('No response from server, adding this to pending database', data, url, method);
+      store.put({data, url, method})
+      });
+      
+      
     });
   }
   
