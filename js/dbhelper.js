@@ -66,7 +66,10 @@ class DBHelper {
         
         if (params) {
           console.log('updatePending() found some params!', params)
-          fetch(url, {method, params}).then((response) => {
+          fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(params)
+          }).then((response) => {
             if (!response.ok && !response.redirected) {
               return;
             }
@@ -179,8 +182,15 @@ class DBHelper {
            callback(null, theseRevs);
          });
        } else {
-         results = [];
          dbPromise.then(db => {
+           let thisStore = db.transaction(revStore).objectStore(revStore)
+           thisStore.getAll().then(data => {
+             let finalData = data.map(values => {
+               return values.data;
+             });
+             console.log('finalRevData is', finalData)
+             callback(null, finalData);
+           })
          })
        }
      });
@@ -406,10 +416,16 @@ class DBHelper {
       const id = data.restaurant_id;
       
       tx.objectStore(revStore).put({data});
-      console.log('Added review to database');
+      console.log('Added review to IndexedDB');
     });
     
-    fetch(url, {data}).catch( () => {
+    console.log('The data in createReview is', typeof data.comments);
+    
+    fetch(url, {
+      method: method,
+      body: JSON.stringify(data)
+      
+    }).catch( () => {
       dbPromise.then(db => {
         const store = db.transaction(pendStore, 'readwrite').objectStore(pendStore);
         console.log('No response from server, adding this to pending database', data, url, method);

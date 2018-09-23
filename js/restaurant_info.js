@@ -162,7 +162,10 @@ createReviewHTML = (review) => {
   li.appendChild(name);
 
   const date = document.createElement('p');
-  const dateData = new Date(review.updatedAt);
+  let dateData;
+  !review.updatedAt
+  ? dateData = new Date()
+  : dateData = new Date(review.updatedAt)
   date.innerHTML = dateData.toLocaleDateString("en-US");
   li.appendChild(date);
 
@@ -212,7 +215,7 @@ getParameterByName = (name, url) => {
  
  revBtn.onclick = () => {
    
-   reviewDiv.style.display = "block";
+   reviewDiv.classList.toggle("rev-show")
  }
  
  const revSubmit = document.getElementById('review-submit')
@@ -230,8 +233,14 @@ revSubmit.onclick = () => {
    
    DBHelper.createReview(review);
    document.getElementById('reviews-list').appendChild(createReviewHTML(review));
+   
+   reviewDiv.classList.toggle("rev-show")
     
  }
+ 
+ /**
+  *
+  */
  
  /**
   * Favorite Functionality

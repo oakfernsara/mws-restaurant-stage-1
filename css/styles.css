@@ -354,3 +354,7 @@ button, input[type="submit"] {
 .fav::before {
   color: red;
 }
+
+.rev-show {
+  display: block !important;
+}
