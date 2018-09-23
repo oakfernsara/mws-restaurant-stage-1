@@ -57,12 +57,23 @@
       <div id="add-review"><button id="rev-btn">Write a Review</button></div>
       <div id="review-form">
         <form id="rev-form">
-          <div><label for="name" id="review-name">Name</label>
-          <input type="text" name="name"></div>
-          <div><label for="rating" id="review-rating">Rating</label><input type="number" name="rating" min="1" max="5"></div>
-          <div><label for="comments">Comments</label>
-          <input type="text" name="comments" id="review-comments"></div>
-          <input type="submit" name ="submit" id="review-submit">
+          <ul class="form-outer">
+            <li>
+              <label for="name" id="review-name">Name</label>
+              <input type="text" name="name" required>
+            </li>
+            <li>
+              <label for="rating" id="review-rating">Rating</label>
+              <input type="number" name="rating" min="1" max="5" required>
+            </li>
+            <li>
+              <label for="comments">Comments</label>
+              <textarea rows="4" name="comments" id="review-comments" required></textarea>
+            </li>
+            <li>
+              <input type="submit" name ="submit" id="review-submit">
+            </li>
+          </ul>
         </form>
       </div>
       <ul id="reviews-list"></ul>

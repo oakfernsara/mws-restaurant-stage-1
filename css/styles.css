@@ -22,7 +22,7 @@ body {
 }
 ul, li {
 	font-family: Arial, Helvetica, sans-serif;
-	font-size: 10pt;
+	font-size: 1em;
 	color: #333;
 }
 a {
@@ -42,6 +42,16 @@ h1, h2, h3, h4, h5, h6 {
 }
 article, aside, canvas, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
 	width: 100%;
+}
+
+input {
+  max-width: 50%;
+  height: 25px;
+  padding: 0 20px;
+}
+
+textarea {
+  width: 100%;
 }
 
 .skip-link {
@@ -314,11 +324,6 @@ nav h1 a {
 #review-form {
   display: none;
   width: 100%;
-  margin: 30px;
-}
-
-label {
-  padding-right: 50%;
 }
 
 button, input[type="submit"] {
@@ -326,19 +331,20 @@ button, input[type="submit"] {
   padding:15px 32px;
   font-size: 16px;
   margin: 10px 0;
+  min-height: 50px;
 }
 
 #add-review {
   width:100%;
 }
 
-#rev-btn {
-  width: 80%;
-  margin: 0 10%;
+ul {
+  padding: 0;
 }
 
-#review-comments {
-  height: 200px;
+#rev-btn {
+  width: 80%;
+  margin: 15px 10%;
 }
 
 #fav-heart {
@@ -357,4 +363,18 @@ button, input[type="submit"] {
 
 .rev-show {
   display: block !important;
+}
+
+.form-outer li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 10px;
+  
+}
+
+.form-outer > li > label {
+  max-width: 220px;
+  min-width: 50px;
+  padding-right: 30px;
 }
